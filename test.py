@@ -267,29 +267,37 @@ class Panle():
         s1 = self.templatxls.sheets[0]
 
         cols = self.conf["source"].keys()
+
+        if not os.path.exist("img"):
+            os.makedirs("img")
+
+        cindex = ""
         for i in range(2, 10300):
             values = []
             try:
                 for c in cols:
+                    cindex = c
                     # print(s2[c+str(i)].value, type(s2[c+str(i)].value))
                     value = s2[c+str(i)].value
                     values.append(value)
 
                     if type(value) not in types.StringTypes:
                         s1[self.conf["source"][c]].value = value
-                    elif value != None:
+                    elif isinstance(value, (int, long, float, complex)):
                         s1[self.conf["source"][c]].value = "'"+str(value)
                     else:
                         s1[self.conf["source"][c]].value = value
                 if sum(v == None for v in values) > (len(values)/2):
                     return
                 img = ImageGrab.grab(self.box)
+               
                 name = "img/"+str(s1[self.conf["file"]['name']].value) + ".jpg"
                 img.save(name)
             except Exception as e:
-                logging.exception("get data fail")
+                logging.exception("get data fail %s%s"%(cindex,i))
 
 
 Panle(root)
 # Label(root).pack()
 root.mainloop()
+                                    
