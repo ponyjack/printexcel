@@ -196,14 +196,14 @@ class Panle():
     def TemplateFie(self):
         name = tkFileDialog.askopenfilename()
         try:
-            print("xxx")
             self.templatxls = xw.Book(name)
-            print("xxx2")
             if name:
                 self.templatefile = name
                 self.templatetext["text"] = os.path.basename(name)
         except EXCEPTION as e:
+            logging.exception("open xls fail")
             tkMessageBox.showinfo("Title", "fail")
+
 
     def ConfigFie(self):
         name = tkFileDialog.askopenfilename()
@@ -215,6 +215,7 @@ class Panle():
                 self.configfile = name
                 self.configtext["text"] = os.path.basename(name)
             except EXCEPTION as e:
+                logging.exception("open config fail")
                 tkMessageBox.showinfo("Title", "fail")
 
     def DataFie(self):
@@ -226,6 +227,7 @@ class Panle():
                     self.datafile = name
                     self.datatext["text"] = os.path.basename(name)
             except EXCEPTION as e:
+                logging.exception("open xls fail")
                 tkMessageBox.showinfo("Title", "fail")
 
     def ScreenCapture(self):
@@ -268,34 +270,32 @@ class Panle():
 
         cols = self.conf["source"].keys()
 
-        if not os.path.exist("img"):
+        if not os.path.exists("img"):
             os.makedirs("img")
 
         cindex = ""
-        for i in range(2, 10300):
+        for i in range(2,  65536):
             values = []
             try:
                 for c in cols:
                     cindex = c
-                    # print(s2[c+str(i)].value, type(s2[c+str(i)].value))
                     value = s2[c+str(i)].value
                     values.append(value)
 
-                    if type(value) not in types.StringTypes:
-                        s1[self.conf["source"][c]].value = value
-                    elif isinstance(value, (int, long, float, complex)):
-                        s1[self.conf["source"][c]].value = "'"+str(value)
-                    else:
+                    if value:
                         s1[self.conf["source"][c]].value = value
                 if sum(v == None for v in values) > (len(values)/2):
-                    return
+                    break
                 img = ImageGrab.grab(self.box)
                
                 name = "img/"+str(s1[self.conf["file"]['name']].value) + ".jpg"
                 img.save(name)
             except Exception as e:
                 logging.exception("get data fail %s%s"%(cindex,i))
-
+                
+                
+        self.root.deiconify()
+        tkMessageBox.showinfo("info", "完成")
 
 Panle(root)
 # Label(root).pack()
