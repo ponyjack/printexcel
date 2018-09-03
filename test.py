@@ -11,6 +11,9 @@ import configparser
 import types
 import logging
 import traceback
+import time
+import hashlib
+import hmac
 
 def raise_frame(frame):
     frame.tkraise()
@@ -211,12 +214,22 @@ class Panle():
             try:
                 c = configparser.ConfigParser()
                 c.read(name)
+                values = []
+                values.extend(c["source"].values())
+                values.extend(c["source"].keys())
+                values.sort()
+                print("".join(values))
+                crc = hmac.new(os.path.basename(name).encode("utf8"), "".join(values), hashlib.sha1).hexdigest()
+                if crc != c["crc"]["key"]:
+                    tkMessageBox.showinfo("Title", "打开配置文件失败")
+                    return
+
                 self.conf = c
                 self.configfile = name
                 self.configtext["text"] = os.path.basename(name)
-            except EXCEPTION as e:
+            except:
                 logging.exception("open config fail")
-                tkMessageBox.showinfo("Title", "fail")
+                tkMessageBox.showinfo("Title", "打开配置文件失败")
 
     def DataFie(self):
         name = tkFileDialog.askopenfilename()
@@ -286,8 +299,8 @@ class Panle():
                         s1[self.conf["source"][c]].value = value
                 if sum(v == None for v in values) > (len(values)/2):
                     break
+                time.sleep(0.2)
                 img = ImageGrab.grab(self.box)
-               
                 name = "img/"+str(s1[self.conf["file"]['name']].value) + ".jpg"
                 img.save(name)
             except Exception as e:
